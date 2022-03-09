@@ -5,7 +5,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace AddressablesKit
 {
     [RequireComponent(typeof(MeshRenderer)), ExecuteAlways]
-    public class AddressableLoader : MonoBehaviour
+    public class AddressableMaterialApplicator : MonoBehaviour
     {
         public static string[] AvailableKeys;
         public string Key;
