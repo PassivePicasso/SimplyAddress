@@ -1,0 +1,13 @@
+{
+  "name": "com.passivepicasso.simplyaddress",
+  "version": "0.1.0",
+  "displayName": "Simply Address",
+  "description": "Simple Addressable components designed for modding",
+  "unity": "2018.9",
+  "release": "26f1",
+  "author": {
+    "name": "ThunderKit",
+    "url": "https://github.com/PassivePicasso/SimplyAddress"
+  }
+}
+ 
