@@ -1,13 +1,18 @@
 {
     "name": "AddressableKit",
-    "references": [],
+    "references": [
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "Unity.Postprocessing.Runtime"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
         "Unity.Addressables.dll",
-        "Unity.ResourceManager.dll"
+        "Unity.ResourceManager.dll",
+        "Unity.Postprocessing.Runtime.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

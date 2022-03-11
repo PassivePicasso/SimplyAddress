@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace AddressablesKit
 {
@@ -16,37 +15,33 @@ namespace AddressablesKit
 
         async void Update()
         {
-            if (lastAddress != Address)
-                try
+            if (lastAddress == Address) return;
+
+            lastAddress = Address;
+            if (transform.childCount > 0)
+            {
+                DestroyChildren(transform);
+            }
+
+            await Addressables.InitializeAsync().Task;
+            prefab = await Addressables.LoadAssetAsync<GameObject>(Address).Task;
+            if (prefab)
+            {
+                instance = Instantiate(prefab);
+                instance.hideFlags = HideFlags.DontSave;
+                instance.transform.position = transform.position;
+                instance.transform.rotation = transform.rotation;
+                instance.transform.localScale = transform.localScale;
+                if (Application.isPlaying && replaceSelf)
                 {
-                    if (transform.childCount > 0)
-                    {
-                        DestroyChildren(transform);
-                        DestroyImmediate(instance);
-                    }
-
-                    prefab = await Addressables.LoadAssetAsync<GameObject>(Address).Task;
-                    if (prefab)
-                    {
-                        instance = Instantiate(prefab);
-                        instance.transform.position = transform.position;
-                        instance.transform.rotation = transform.rotation;
-                        instance.transform.localScale = transform.localScale;
-                        if (Application.isPlaying && replaceSelf)
-                        {
-                            Destroy(this);
-                        }
-                        else
-                            instance.transform.parent = transform;
-
-
-                        SetRecursiveFlags(instance.transform);
-                    }
+                    Destroy(gameObject);
                 }
-                finally
-                {
-                    lastAddress = Address;
-                }
+                else
+                    instance.transform.parent = transform;
+
+
+                SetRecursiveFlags(instance.transform);
+            }
         }
 
         static void SetRecursiveFlags(Transform transform)
@@ -64,9 +59,8 @@ namespace AddressablesKit
 
         private void OnDisable()
         {
-            DestroyImmediate(instance);
+            DestroyChildren(transform);
             lastAddress = null;
-            Addressables.Release(prefab);
         }
     }
 }
