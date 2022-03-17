@@ -1,7 +1,9 @@
 {
     "name": "SimplyAddress.Editor",
     "references": [
-        "GUID:8745aee917fbaed40a0843eaa44d35a9"
+        "SimplyAddress.Runtime",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [
         "Editor"
