@@ -1,57 +1,66 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace PassivePicasso.RainOfStages.AddressableComponents
+namespace PassivePicasso.SimplyAddress
 {
     [ExecuteAlways]
-    public abstract class AddressableArrayAssigner<ComponentType, AssetType> : MonoBehaviour where AssetType : UnityEngine.Object where ComponentType : Component
+    public abstract class AddressableArrayAssigner<ComponentType, AssetType> : SimpleAddress where AssetType : UnityEngine.Object where ComponentType : Component
     {
         public ComponentType[] TargetComponents;
-        public static string[] AvailableKeys;
-        public string Key;
-        private string LastKey;
-        private AssetType assetInstance;
+        [NonSerialized]
+        public AssetType AssetInstance;
 
         void Update()
         {
-            if (LastKey == Key) return;
+            if (lastAddress == Address) return;
 
-            LastKey = Key;
-            if (string.IsNullOrEmpty(Key)) return;
+            lastAddress = Address;
+            if (string.IsNullOrEmpty(Address)) return;
             Load();
         }
 
         private void Load()
         {
-            var loadOperation = Addressables.LoadAssetAsync<AssetType>(Key);
+            var loadOperation = Addressables.LoadAssetAsync<AssetType>(Address);
             loadOperation.Completed += OnLoaded;
         }
 
         private void OnEnable()
         {
-            if (!assetInstance)
+            if (!AssetInstance)
                 Load();
             else
                 AssignInternal();
         }
+
         private void OnDisable()
         {
-            
+            UnassignInternal();
         }
 
         void OnLoaded(AsyncOperationHandle<AssetType> obj)
         {
-            assetInstance = obj.Result;
-            assetInstance.hideFlags = HideFlags.NotEditable | HideFlags.HideAndDontSave;
+            if (!obj.Result) return;
+            obj.Result.hideFlags = HideFlags.NotEditable | HideFlags.HideAndDontSave;
+            AssetInstance = Instantiate(obj.Result);
+            AssetInstance.hideFlags = HideFlags.NotEditable | HideFlags.HideAndDontSave;
+            AssetInstance.name = AssetInstance.name.Replace("(Clone)", "(WeakReference)");
             AssignInternal();
         }
 
         private void AssignInternal()
         {
-            if (assetInstance)
+            if (AssetInstance)
                 foreach (var component in TargetComponents)
-                    Assign(component, assetInstance);
+                    Assign(component, AssetInstance);
+        }
+        private void UnassignInternal()
+        {
+            if (AssetInstance)
+                foreach (var component in TargetComponents)
+                    Unassign(component, AssetInstance);
         }
 
         protected abstract void Assign(ComponentType component, AssetType asset);

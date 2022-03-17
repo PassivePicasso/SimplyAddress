@@ -1,48 +1,69 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace AddressablesKit
+namespace PassivePicasso.SimplyAddress
 {
     [ExecuteAlways]
-    public class AddressablePrefab : MonoBehaviour
+    public class AddressablePrefab : SimpleAddress
     {
+        public static readonly Dictionary<string, GameObject> PrefabCache = new Dictionary<string, GameObject>();
         public bool replaceSelf;
-        private string lastAddress;
-        public string Address;
 
-        private GameObject prefab;
-        private GameObject instance;
+        [NonSerialized]
+        public GameObject instance;
+        private AsyncOperationHandle<GameObject> asyncOperation;
 
-        async void Update()
+        void Update()
         {
-            if (lastAddress == Address) return;
+            if (instance && lastAddress == Address) return;
 
             lastAddress = Address;
             if (transform.childCount > 0)
-            {
                 DestroyChildren(transform);
+
+            if (!asyncOperation.IsValid())
+            {
+                asyncOperation = Addressables.LoadAssetAsync<GameObject>(Address);
+                PrefabCache[Address] = null;
             }
 
-            await Addressables.InitializeAsync().Task;
-            prefab = await Addressables.LoadAssetAsync<GameObject>(Address).Task;
-            if (prefab)
+            switch (asyncOperation.Status)
             {
-                instance = Instantiate(prefab);
-                instance.hideFlags = HideFlags.DontSave;
-                instance.transform.position = transform.position;
-                instance.transform.rotation = transform.rotation;
-                instance.transform.localScale = transform.localScale;
-                if (Application.isPlaying && replaceSelf)
-                {
-                    Destroy(gameObject);
-                }
-                else
-                    instance.transform.parent = transform;
+                case AsyncOperationStatus.None:
+                    break;
+                case AsyncOperationStatus.Succeeded:
+                    PrefabCache[Address] = asyncOperation.Result;
+                    break;
+                case AsyncOperationStatus.Failed:
+                    break;
+            }
 
-
-                SetRecursiveFlags(instance.transform);
+            if (PrefabCache[Address])
+            {
+                CreateInstance();
             }
         }
+
+        private void CreateInstance()
+        {
+            instance = Instantiate(PrefabCache[Address]);
+            instance.hideFlags = HideFlags.DontSave;
+            instance.transform.position = transform.position;
+            instance.transform.rotation = transform.rotation;
+            instance.transform.localScale = transform.localScale;
+            if (Application.isPlaying && replaceSelf)
+            {
+                Destroy(gameObject);
+            }
+            else
+                instance.transform.parent = transform;
+
+            SetRecursiveFlags(instance.transform);
+        }
+
 
         static void SetRecursiveFlags(Transform transform)
         {
@@ -55,7 +76,6 @@ namespace AddressablesKit
             for (int i = 0; i < transform.childCount;)
                 DestroyImmediate(transform.GetChild(i).gameObject);
         }
-
 
         private void OnDisable()
         {

@@ -1,5 +1,5 @@
 {
-    "name": "AddressableKit",
+    "name": "SimplyAddress.Runtime",
     "references": [
         "Unity.Addressables",
         "Unity.ResourceManager",

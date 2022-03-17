@@ -1,31 +1,33 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace AddressablesKit
+namespace PassivePicasso.SimplyAddress
 {
     [ExecuteAlways]
-    public class AddressableSkybox : MonoBehaviour
+    public class AddressableSkybox : SimpleAddress
     {
-        public string Key;
-        private string LastKey;
+        [NonSerialized]
+        public Material material;
         // Start is called before the first frame update
         void Update()
         {
-            if (LastKey == Key) return;
-            if (string.IsNullOrEmpty(Key)) return;
+            if (material && lastAddress == Address) return;
+            if (string.IsNullOrEmpty(Address)) return;
 
-            LastKey = Key;
-            var materialOp = Addressables.LoadAssetAsync<Material>(Key);
+            lastAddress = Address;
+            var materialOp = Addressables.LoadAssetAsync<Material>(Address);
             materialOp.Completed += MaterialOp_Completed;
         }
 
 
         void MaterialOp_Completed(AsyncOperationHandle<Material> obj)
         {
-            var material = obj.Result;
+            material = obj.Result;
             if (material)
             {
+                material.hideFlags = HideFlags.HideAndDontSave;
                 RenderSettings.skybox = material;
             }
         }

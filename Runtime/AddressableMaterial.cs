@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace PassivePicasso.RainOfStages.AddressableComponents
+namespace PassivePicasso.SimplyAddress
 {
     [ExecuteAlways]
     public class AddressableMaterial : AddressableArrayAssigner<Renderer, Material>
