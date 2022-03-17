@@ -12,7 +12,8 @@
     "precompiledReferences": [
         "Unity.Addressables.dll",
         "Unity.ResourceManager.dll",
-        "Unity.Postprocessing.Runtime.dll"
+        "Unity.Postprocessing.Runtime.dll",
+        "BepInEx.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
