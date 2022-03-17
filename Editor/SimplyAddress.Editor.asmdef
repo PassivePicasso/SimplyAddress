@@ -1,3 +1,20 @@
-﻿{
-	"name": "SimplyAddress.Editor"
+{
+    "name": "SimplyAddress.Editor",
+    "references": [
+        "GUID:8745aee917fbaed40a0843eaa44d35a9"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Unity.Addressables.dll",
+        "Unity.ResourceManager.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
