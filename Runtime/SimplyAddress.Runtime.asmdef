@@ -10,6 +10,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
+        "UnityEngine.UI.dll",
         "Unity.Addressables.dll",
         "Unity.ResourceManager.dll",
         "Unity.Postprocessing.Runtime.dll",
