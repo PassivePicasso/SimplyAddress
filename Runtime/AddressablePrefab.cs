@@ -10,43 +10,52 @@ namespace PassivePicasso.SimplyAddress
     public class AddressablePrefab : SimpleAddress
     {
         public static readonly Dictionary<string, GameObject> PrefabCache = new Dictionary<string, GameObject>();
+
+        static AddressablePrefab()
+        {
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += SceneManager_sceneUnloaded;
+        }
+
+        private static void SceneManager_sceneUnloaded(UnityEngine.SceneManagement.Scene arg0)
+        {
+            foreach (var prefab in PrefabCache.Values)
+                Destroy(prefab);
+
+            PrefabCache.Clear();
+        }
+
         public bool replaceSelf;
 
         [NonSerialized]
         public GameObject instance;
-        private AsyncOperationHandle<GameObject> asyncOperation;
-
+        private AsyncOperationHandle<GameObject> prefabLoadOperation;
         void Update()
         {
             if (instance && lastAddress == Address) return;
+            if (string.IsNullOrEmpty(Address)) return;
 
             lastAddress = Address;
-            if (transform.childCount > 0)
+            if (PrefabCache.ContainsKey(Address))
+            {
                 DestroyChildren(transform);
-
-            if (!asyncOperation.IsValid())
+                CreateInstance();
+            } 
+            else if (!prefabLoadOperation.IsValid() || prefabLoadOperation.Status != AsyncOperationStatus.None)
             {
-                asyncOperation = Addressables.LoadAssetAsync<GameObject>(Address);
-                PrefabCache[Address] = null;
+                prefabLoadOperation = Addressables.LoadAssetAsync<GameObject>(Address);
+                prefabLoadOperation.Completed += OnCompleted;
+                prefabLoadOperation.Destroyed += (AsyncOperationHandle _) => Debug.Log("Operation has been destroyed");
             }
-
-            switch (asyncOperation.Status)
+        }
+        private void OnCompleted(AsyncOperationHandle<GameObject> aOp)
+        {
+            if (aOp.Status == AsyncOperationStatus.Succeeded)
             {
-                case AsyncOperationStatus.None:
-                    break;
-                case AsyncOperationStatus.Succeeded:
-                    PrefabCache[Address] = asyncOperation.Result;
-                    break;
-                case AsyncOperationStatus.Failed:
-                    break;
-            }
-
-            if (PrefabCache[Address])
-            {
+                PrefabCache[Address] = aOp.Result;
+                DestroyChildren(transform);
                 CreateInstance();
             }
         }
-
         private void CreateInstance()
         {
             instance = Instantiate(PrefabCache[Address]);
@@ -73,8 +82,10 @@ namespace PassivePicasso.SimplyAddress
         }
         static void DestroyChildren(Transform transform)
         {
-            for (int i = 0; i < transform.childCount;)
-                DestroyImmediate(transform.GetChild(i).gameObject);
+            while (transform.childCount > 0)
+            {
+                DestroyImmediate(transform.GetChild(0).gameObject);
+            }
         }
 
         private void OnDisable()
