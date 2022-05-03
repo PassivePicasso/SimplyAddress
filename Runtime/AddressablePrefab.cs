@@ -32,6 +32,7 @@ namespace PassivePicasso.SimplyAddress
         void Update()
         {
             if (instance && lastAddress == Address) return;
+            if (string.IsNullOrEmpty(Address)) return;
 
             lastAddress = Address;
             if (PrefabCache.ContainsKey(Address))
