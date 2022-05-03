@@ -10,6 +10,20 @@ namespace PassivePicasso.SimplyAddress
     public class AddressablePrefab : SimpleAddress
     {
         public static readonly Dictionary<string, GameObject> PrefabCache = new Dictionary<string, GameObject>();
+
+        static AddressablePrefab()
+        {
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += SceneManager_sceneUnloaded;
+        }
+
+        private static void SceneManager_sceneUnloaded(UnityEngine.SceneManagement.Scene arg0)
+        {
+            foreach (var prefab in PrefabCache.Values)
+                Destroy(prefab);
+
+            PrefabCache.Clear();
+        }
+
         public bool replaceSelf;
 
         [NonSerialized]
