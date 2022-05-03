@@ -9,13 +9,12 @@ namespace PassivePicasso.SimplyAddress
     [ExecuteAlways]
     public class AddressablePrefab : SimpleAddress
     {
-        [SerializeField]
         public static readonly Dictionary<string, GameObject> PrefabCache = new Dictionary<string, GameObject>();
         public bool replaceSelf;
 
         [NonSerialized]
         public GameObject instance;
-        private AsyncOperationHandle<GameObject> baseOp;
+        private AsyncOperationHandle<GameObject> prefabLoadOperation;
         void Update()
         {
             if (instance && lastAddress == Address) return;
@@ -26,11 +25,11 @@ namespace PassivePicasso.SimplyAddress
                 CreateInstance();
             }
             
-            if (!baseOp.IsValid() || baseOp.Status != AsyncOperationStatus.None)
+            if (!prefabLoadOperation.IsValid() || prefabLoadOperation.Status != AsyncOperationStatus.None)
             {
-                baseOp = Addressables.LoadAssetAsync<GameObject>(Address);
-                baseOp.Completed += OnCompleted;
-                baseOp.Destroyed += (AsyncOperationHandle _) => Debug.Log("Operation has been destroyed");
+                prefabLoadOperation = Addressables.LoadAssetAsync<GameObject>(Address);
+                prefabLoadOperation.Completed += OnCompleted;
+                prefabLoadOperation.Destroyed += (AsyncOperationHandle _) => Debug.Log("Operation has been destroyed");
             }
         }
         private void OnCompleted(AsyncOperationHandle<GameObject> aOp)
@@ -39,10 +38,7 @@ namespace PassivePicasso.SimplyAddress
             if(aOp.Status == AsyncOperationStatus.Succeeded)
             {
                 PrefabCache[Address] = aOp.Result;
-                if (transform.childCount > 0)
-                {
-                    DestroyChildren(transform);
-                }
+                DestroyChildren(transform);
                 CreateInstance();
             }
         }
@@ -72,8 +68,10 @@ namespace PassivePicasso.SimplyAddress
         }
         static void DestroyChildren(Transform transform)
         {
-            for (int i = 0; i < transform.childCount; i++)
-                DestroyImmediate(transform.GetChild(i).gameObject);
+            while(transform.childCount > 0)
+            {
+                DestroyImmediate(transform.GetChild(0).gameObject);
+            }
         }
 
         private void OnDisable()
