@@ -36,6 +36,7 @@ namespace PassivePicasso.SimplyAddress
             lastAddress = Address;
             if (PrefabCache.ContainsKey(Address))
             {
+                DestroyChildren(transform);
                 CreateInstance();
             } 
             else if (!prefabLoadOperation.IsValid() || prefabLoadOperation.Status != AsyncOperationStatus.None)
