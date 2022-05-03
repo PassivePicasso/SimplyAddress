@@ -48,8 +48,7 @@ namespace PassivePicasso.SimplyAddress
         }
         private void OnCompleted(AsyncOperationHandle<GameObject> aOp)
         {
-            Debug.Log("Operation completed");
-            if(aOp.Status == AsyncOperationStatus.Succeeded)
+            if (aOp.Status == AsyncOperationStatus.Succeeded)
             {
                 PrefabCache[Address] = aOp.Result;
                 DestroyChildren(transform);
