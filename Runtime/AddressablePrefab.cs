@@ -37,9 +37,8 @@ namespace PassivePicasso.SimplyAddress
             if (PrefabCache.ContainsKey(Address))
             {
                 CreateInstance();
-            }
-            
-            if (!prefabLoadOperation.IsValid() || prefabLoadOperation.Status != AsyncOperationStatus.None)
+            } 
+            else if (!prefabLoadOperation.IsValid() || prefabLoadOperation.Status != AsyncOperationStatus.None)
             {
                 prefabLoadOperation = Addressables.LoadAssetAsync<GameObject>(Address);
                 prefabLoadOperation.Completed += OnCompleted;
