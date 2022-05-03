@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEditorInternal;
@@ -38,11 +39,11 @@ namespace PassivePicasso.SimplyAddress
             GUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
             EditorGUILayout.PropertyField(addressProperty);
             GUILayout.Space(EditorGUIUtility.standardVerticalSpacing);
-
-            using (new DisabledScope(true))
-            {
-                CustomDrawFoldoutInspector(addMat.AssetInstance, ref materialEditor);
-            }
+            if (!addMat.TargetComponents.Any(tc => tc.gameObject == addMat.gameObject))
+                using (new DisabledScope(true))
+                {
+                    CustomDrawFoldoutInspector(addMat.AssetInstance, ref materialEditor);
+                }
 
             serializedObject.ApplyModifiedProperties();
         }
