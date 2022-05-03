@@ -34,7 +34,7 @@ namespace PassivePicasso.SimplyAddress
             if (instance && lastAddress == Address) return;
 
             lastAddress = Address;
-            if(PrefabCache.ContainsKey(Address))
+            if (PrefabCache.ContainsKey(Address))
             {
                 CreateInstance();
             }
@@ -81,7 +81,7 @@ namespace PassivePicasso.SimplyAddress
         }
         static void DestroyChildren(Transform transform)
         {
-            while(transform.childCount > 0)
+            while (transform.childCount > 0)
             {
                 DestroyImmediate(transform.GetChild(0).gameObject);
             }
