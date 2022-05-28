@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Events;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace PassivePicasso.SimplyAddress
@@ -11,20 +12,8 @@ namespace PassivePicasso.SimplyAddress
     {
         public static readonly Dictionary<string, GameObject> PrefabCache = new Dictionary<string, GameObject>();
 
-        static AddressablePrefab()
-        {
-            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += SceneManager_sceneUnloaded;
-        }
-
-        private static void SceneManager_sceneUnloaded(UnityEngine.SceneManagement.Scene arg0)
-        {
-            foreach (var prefab in PrefabCache.Values)
-                Destroy(prefab);
-
-            PrefabCache.Clear();
-        }
-
         public bool replaceSelf;
+        public UnityEvent OnInstantiated;
 
         [NonSerialized]
         public GameObject instance;
@@ -35,11 +24,10 @@ namespace PassivePicasso.SimplyAddress
             if (string.IsNullOrEmpty(Address)) return;
 
             lastAddress = Address;
-            if (PrefabCache.ContainsKey(Address))
+            if (PrefabCache.ContainsKey(Address) && PrefabCache[Address])
             {
-                DestroyChildren(transform);
                 CreateInstance();
-            } 
+            }
             else if (!prefabLoadOperation.IsValid() || prefabLoadOperation.Status != AsyncOperationStatus.None)
             {
                 prefabLoadOperation = Addressables.LoadAssetAsync<GameObject>(Address);
@@ -49,15 +37,15 @@ namespace PassivePicasso.SimplyAddress
         }
         private void OnCompleted(AsyncOperationHandle<GameObject> aOp)
         {
-            if (aOp.Status == AsyncOperationStatus.Succeeded)
+            if (aOp.Status == AsyncOperationStatus.Succeeded && aOp.Result)
             {
                 PrefabCache[Address] = aOp.Result;
-                DestroyChildren(transform);
-                CreateInstance();
             }
         }
+
         private void CreateInstance()
         {
+            DestroyChildren(transform);
             instance = Instantiate(PrefabCache[Address]);
             instance.hideFlags = HideFlags.DontSave;
             instance.transform.position = transform.position;
@@ -71,6 +59,7 @@ namespace PassivePicasso.SimplyAddress
                 instance.transform.parent = transform;
 
             SetRecursiveFlags(instance.transform);
+            OnInstantiated?.Invoke();
         }
 
 
