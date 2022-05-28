@@ -13,6 +13,12 @@ namespace PassivePicasso.SimplyAddress
         // Start is called before the first frame update
         void Update()
         {
+            if (material && material != RenderSettings.skybox)
+            {
+                material.hideFlags = HideFlags.HideAndDontSave;
+                RenderSettings.skybox = material;
+                return;
+            }
             if (material && lastAddress == Address) return;
             if (string.IsNullOrEmpty(Address)) return;
 
@@ -25,11 +31,6 @@ namespace PassivePicasso.SimplyAddress
         void MaterialOp_Completed(AsyncOperationHandle<Material> obj)
         {
             material = obj.Result;
-            if (material)
-            {
-                material.hideFlags = HideFlags.HideAndDontSave;
-                RenderSettings.skybox = material;
-            }
         }
     }
 }

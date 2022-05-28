@@ -1,17 +1,38 @@
-﻿using System;
+﻿using System.Linq;
 using UnityEditor;
-using UnityEditor.UIElements;
-using UnityEditorInternal;
+using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.SceneManagement;
 using static UnityEditor.EditorGUI;
 using UnityObject = UnityEngine.Object;
 
 namespace PassivePicasso.SimplyAddress
 {
+    [InitializeOnLoad]
     [CustomEditor(typeof(AddressableSkybox), true)]
     public class AddressableSkyboxEditor : Editor
     {
+        [InitializeOnLoadMethod]
+        static void InitializeSkyboxSystem()
+        {
+            EditorSceneManager.sceneSaving += SceneSaving;
+            EditorSceneManager.sceneSaved += SceneSaved;
+        }
+
+        static void SceneSaved(Scene scene)
+        {
+            var addressableSkybox = scene.GetRootGameObjects().SelectMany(rgo => rgo.GetComponentsInChildren<AddressableSkybox>()).FirstOrDefault();
+            if (!addressableSkybox) return;
+            RenderSettings.skybox = addressableSkybox.material;
+        }
+
+        static void SceneSaving(Scene scene, string path)
+        {
+            var addressableSkybox = scene.GetRootGameObjects().SelectMany(rgo => rgo.GetComponentsInChildren<AddressableSkybox>()).FirstOrDefault();
+            if (!addressableSkybox) return;
+            RenderSettings.skybox = null;
+        }
+
         Editor materialEditor;
         public override void OnInspectorGUI()
         {
